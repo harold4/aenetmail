@@ -10,5 +10,6 @@ namespace AE.Net.Mail {
 		void Disconnect();
 
 		event EventHandler<WarningEventArgs> Warning;
+        event EventHandler<EmailReadedEventArgs> Rfc822Readed;
 	}
 }

@@ -298,12 +298,12 @@ Content-Type: multipart/mixed;
 
 This is a multipart message in MIME format.
 
---XXXXboundary text 
+--XXXXboundary text
 Content-Type: text/plain
 
 this is the body text
 
---XXXXboundary text 
+--XXXXboundary text
 Content-Type: text/plain;
 Content-Disposition: attachment; filename=""test.txt""
 
@@ -324,7 +324,7 @@ Content-Type: multipart/mixed; boundary=""boundary1""
 
 This is a multipart message in MIME format.
 
---boundary1 
+--boundary1
 Content-Type: multipart/mixed; boundary=""boundary2""
 
 This is a multipart message in MIME format.
@@ -368,7 +368,7 @@ Content-Disposition: attachment; filename=""test.html""
 
 <strong>this is the body text</strong>
 
---boundary1 
+--boundary1
 Content-Type: multipart/mixed; boundary=""boundary2""
 
 This is a multipart message in MIME format.
@@ -466,7 +466,7 @@ Content-Disposition: attachment
             };
             attachment.Headers.Add("Content-Type", new HeaderValue(@"application/binary; filename=""Data.bin"""));
             msg.Attachments.Add(attachment);
-            
+
 
             var reparsed = Reparse(msg);
             reparsed.Attachments.Count.ShouldBe(2);

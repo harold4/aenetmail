@@ -1,0 +1,104 @@
+* text=auto !eol
+#svneol=unset
+
+*.php text=auto
+*.xhtml text=auto
+*.xml text=auto
+*.js text=auto
+*.html text=auto
+*.bat text=auto
+*.xsd text=auto
+*.xsl text=auto
+*.wsdl text=auto
+*.wssc text=auto
+*.sql text=auto
+*.css text=auto
+*.scss text=auto
+*.sass text=auto
+*.less text=auto
+*.txt text=auto
+*.lang text=auto
+*.htc text=auto
+*.svg text=auto
+*.jnlp text=auto
+*.properties text=auto
+*.font text=auto
+*.csproj text=auto
+*.json text=auto
+*.sln text=auto
+*.cs text=auto
+*.rb text=auto
+*.java text=auto
+*.makefile text=auto
+makefile text=auto
+makefile.* text=auto
+makefile-config.* text=auto
+*.conf text=auto
+*.wiki text=auto
+*.gradle text=auto
+*.rx text=auto
+*.md text=auto
+*.spp text=auto
+*.htm text=auto
+
+*.crt text=auto eol=lf
+*.key text=auto eol=lf
+*.csr text=auto eol=lf
+*.pkey text=auto eol=lf
+
+
+
+*.tpl text=auto
+
+*.png binary
+*.gif binary
+*.jpg binary
+*.psd binary
+*.ico binary
+*.ai binary
+*.exe binary
+*.dll binary
+*.ver binary
+*.jar binary
+*.class binary
+*.eml binary
+*.es3 binary
+*.map binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.woff binary
+Thumbs.db binary
+*.swf binary
+*.pdb binary
+*.pdm binary
+create.dir binary
+*.pdf binary
+
+
+link-gitconfig.txt eol=lf
+
+.braids eol=lf
+
+**/bower.json eol=lf
+**/bower_components/**/*.js eol=lf
+**/bower_components/**/*.json eol=lf
+**/bower_components/**/PATENTS text=auto eol=lf
+**/bower_components/**/LICENSE text=auto eol=lf
+**/bower_components/**/CHANGES text=auto eol=lf
+**/bower_components/**/Makefile text=auto eol=lf
+**/bower_components/**/*.md text=auto eol=lf
+**/bower_components/**/*.html text=auto eol=lf
+**/bower_components/**/*.txt text=auto eol=lf
+**/bower_components/**/*.sh text=auto eol=lf
+
+**/gulpfile.js eol=lf
+**/package.json eol=lf
+
+**/.idea/**/*.xml eol=lf
+**/.idea/**/*.iml eol=lf
+**/.idea/inspectionProfiles/*.xml eol=crlf
+**/.idea/scopes/*.xml eol=crlf
+
+**/FodyWeavers.xml eol=lf

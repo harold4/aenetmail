@@ -4,8 +4,8 @@ using System.Net.Sockets;
 
 namespace AE.Net.Mail {
 	public abstract class TextClient : IDisposable {
-		protected TcpClient _Connection;
-		protected Stream _Stream;
+		protected TcpClient Connection;
+		protected Stream Stream;
 
 		public virtual string Host { get; private set; }
 		public virtual int Port { get; set; }
@@ -13,7 +13,7 @@ namespace AE.Net.Mail {
 		public virtual bool IsConnected { get; private set; }
 		public virtual bool IsAuthenticated { get; private set; }
 		public virtual bool IsDisposed { get; private set; }
-		public virtual System.Text.Encoding Encoding { get; set; }
+        public System.Text.Encoding Encoding { get; set; }
 		public int ServerTimeout { get; set; }
 
 		public event EventHandler<WarningEventArgs> Warning;
@@ -25,17 +25,17 @@ namespace AE.Net.Mail {
 			}
 		}
 
-		public TextClient() {
+	    protected TextClient() {
 			Encoding = System.Text.Encoding.GetEncoding(1252);
 			ServerTimeout = 10000;
 		}
 
 		internal abstract void OnLogin(string username, string password);
 		internal abstract void OnLogout();
-		internal abstract void CheckResultOK(string result);
+		internal abstract void CheckResultOk(string result);
 
 		protected virtual void OnConnected(string result) {
-			CheckResultOK(result);
+			CheckResultOk(result);
 		}
 
 		public virtual void Login(string username, string password) {
@@ -65,15 +65,15 @@ namespace AE.Net.Mail {
 				Port = port;
 				Ssl = ssl;
 
-				_Connection = new TcpClient(hostname, port);
-				_Stream = _Connection.GetStream();
+				Connection = new TcpClient(hostname, port);
+				Stream = Connection.GetStream();
 				if (ssl) {
 					System.Net.Security.SslStream sslStream;
 					if (validateCertificate != null)
-						sslStream = new System.Net.Security.SslStream(_Stream, false, validateCertificate);
+						sslStream = new System.Net.Security.SslStream(Stream, false, validateCertificate);
 					else
-						sslStream = new System.Net.Security.SslStream(_Stream, false);
-					_Stream = sslStream;
+						sslStream = new System.Net.Security.SslStream(Stream, false);
+					Stream = sslStream;
 					sslStream.AuthenticateAsClient(hostname);
 				}
 
@@ -83,14 +83,14 @@ namespace AE.Net.Mail {
 				Host = hostname;
 			} catch (Exception) {
 				IsConnected = false;
-				Utilities.TryDispose(ref _Stream);
+				Utilities.TryDispose(ref Stream);
 				throw;
 			}
 		}
 
 		protected virtual void CheckConnectionStatus() {
 			if (IsDisposed)
-				throw new ObjectDisposedException(this.GetType().Name);
+				throw new ObjectDisposedException(GetType().Name);
 			if (!IsConnected)
 				throw new Exception("You must connect first!");
 			if (!IsAuthenticated)
@@ -99,7 +99,7 @@ namespace AE.Net.Mail {
 
 		protected virtual void SendCommand(string command) {
 			var bytes = System.Text.Encoding.Default.GetBytes(command + "\r\n");
-			_Stream.Write(bytes, 0, bytes.Length);
+			Stream.Write(bytes, 0, bytes.Length);
 		}
 
 		protected virtual string SendCommandGetResponse(string command) {
@@ -114,11 +114,11 @@ namespace AE.Net.Mail {
 
 		protected virtual string GetResponse(int timeout) {
 			int max = 0;
-			return _Stream.ReadLine(ref max, Encoding, null, timeout);
+			return Stream.ReadLine(ref max, Encoding, null, timeout);
 		}
 
-		protected virtual void SendCommandCheckOK(string command) {
-			CheckResultOK(SendCommandGetResponse(command));
+		protected virtual void SendCommandCheckOk(string command) {
+			CheckResultOk(SendCommandGetResponse(command));
 		}
 
 		public virtual void Disconnect() {
@@ -128,8 +128,8 @@ namespace AE.Net.Mail {
 				Logout();
 			}
 			IsConnected = false;
-			Utilities.TryDispose(ref _Stream);
-			Utilities.TryDispose(ref _Connection);
+			Utilities.TryDispose(ref Stream);
+			Utilities.TryDispose(ref Connection);
 		}
 
 		~TextClient() {
@@ -147,8 +147,8 @@ namespace AE.Net.Mail {
 						Disconnect();
 					}
 
-			_Stream = null;
-			_Connection = null;
+			Stream = null;
+			Connection = null;
 		}
 	}
 }

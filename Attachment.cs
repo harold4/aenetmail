@@ -1,7 +1,7 @@
 using System;
 
 namespace AE.Net.Mail {
-	public class Attachment : ObjectWHeaders {
+	public sealed class Attachment : ObjectWHeaders {
 		public Attachment() { }
 		public Attachment(byte[] data, string contentType, string name = null, bool isAttachment = false)
 			: this(contentType, name, isAttachment) {
@@ -20,7 +20,7 @@ namespace AE.Net.Mail {
 			}
 		}
 
-		public virtual string Filename {
+		public string Filename {
 			get {
 				return Headers["Content-Disposition"]["filename"].NotEmpty(
 													Headers["Content-Disposition"]["name"],
@@ -29,12 +29,12 @@ namespace AE.Net.Mail {
 			}
 		}
 
-		private string _ContentDisposition;
+		private string _contentDisposition;
 		private string ContentDisposition {
-			get { return _ContentDisposition ?? (_ContentDisposition = Headers["Content-Disposition"].Value.ToLower()); }
+			get { return _contentDisposition ?? (_contentDisposition = Headers["Content-Disposition"].Value.ToLower()); }
 		}
 
-		public virtual bool OnServer { get; internal set; }
+		public bool OnServer { get; internal set; }
 
 		internal bool IsAttachment {
 			get {
@@ -42,17 +42,17 @@ namespace AE.Net.Mail {
 			}
 		}
 
-		public virtual void Save(string filename) {
+		public void Save(string filename) {
 			using (var file = new System.IO.FileStream(filename, System.IO.FileMode.Create))
 				Save(file);
 		}
 
-		public virtual void Save(System.IO.Stream stream) {
+		public void Save(System.IO.Stream stream) {
 			var data = GetData();
 			stream.Write(data, 0, data.Length);
 		}
 
-		public virtual byte[] GetData() {
+		public byte[] GetData() {
 			byte[] data;
 			var body = Body;
 			if (ContentTransferEncoding.Is("base64") && Utilities.IsValidBase64String(ref body)) {

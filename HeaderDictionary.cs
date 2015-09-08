@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
@@ -13,7 +14,7 @@ namespace AE.Net.Mail {
 			return this["Content-Type"]["boundary"];
 		}
 
-		private static Regex[] rxDates = new[]{
+		private static readonly Regex[] RxDates = new[]{
         @"\d{1,2}\s+[a-z]{3}\s+\d{2,4}\s+\d{1,2}\:\d{2}\:\d{1,2}\s+[\+\-\d\:]*",
         @"\d{4}\-\d{1,2}-\d{1,2}\s+\d{1,2}\:\d{2}(?:\:\d{2})?(?:\s+[\+\-\d:]+)?",
       }.Select(x => new Regex(x, RegexOptions.Compiled | RegexOptions.IgnoreCase)).ToArray();
@@ -21,7 +22,7 @@ namespace AE.Net.Mail {
 		public virtual DateTime GetDate() {
 			var value = this["Date"].RawValue.ToNullDate();
 			if (value == null) {
-				foreach (var rx in rxDates) {
+				foreach (var rx in RxDates) {
 					var match = rx.Matches(this["Received"].RawValue ?? string.Empty)
 						.Cast<Match>().LastOrDefault();
 					if (match != null) {
@@ -42,7 +43,7 @@ namespace AE.Net.Mail {
 			var value = this[name].RawValue;
 			if (string.IsNullOrEmpty(value)) return default(T);
 			var values = System.Enum.GetValues(typeof(T)).Cast<T>().ToArray();
-			return values.FirstOrDefault(x => x.ToString().Equals(value, StringComparison.OrdinalIgnoreCase));
+			return values.FirstOrDefault(x => x.ToString(CultureInfo.InvariantCulture).Equals(value, StringComparison.InvariantCulture));
 		}
 
 		public virtual void Add(string name, string value) {
@@ -50,7 +51,7 @@ namespace AE.Net.Mail {
 		}
 
 		public virtual void Add(string name, DateTime value) {
-			this[name] = new HeaderValue(value.GetRFC2060Date());
+			this[name] = new HeaderValue(value.GetRfc2060Date());
 		}
 
 		public virtual MailAddress[] GetMailAddresses(string header) {
@@ -92,19 +93,18 @@ namespace AE.Net.Mail {
 			headers = Utilities.DecodeWords(headers, encoding);
 			var temp = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 			var lines = headers.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-			int i;
-			string key = null, value;
-			foreach (var line in lines) {
+		    string key = null;
+		    foreach (var line in lines) {
 				if (key != null && (line[0] == '\t' || line[0] == ' ')) {
 					temp[key] += line.TrimStartOnce();
 				} else {
 					if (key != null)
 						temp[key] = temp[key].TrimEndOnce(); // It trims the last line of the previous key
 
-					i = line.IndexOf(':');
+					int i = line.IndexOf(':');
 					if (i > -1) {
 						key = line.Substring(0, i).TrimStartOnce();
-						value = line.Substring(i + 1).TrimStartOnce();
+						string value = line.Substring(i + 1).TrimStartOnce();
 						temp.Set(key, value);
 					}
 				}
@@ -125,7 +125,7 @@ namespace AE.Net.Mail {
                 if (!withinQuotes) {
                     if (str[i] == searchChar)
                         return i;
-                    
+
                     if (str[i] == '"')
                         withinQuotes = true;
                 }

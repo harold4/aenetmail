@@ -9,9 +9,9 @@ namespace AE.Net.Mail
 
         public enum Fields
         {
-            BCC, Before, Body, Cc, From, Header, Keyword,
+            Bcc, Before, Body, Cc, From, Header, Keyword,
             Larger, On, SentBefore, SentOn, SentSince, Since, Smaller, Subject,
-            Text, To, UID, Unkeyword, All, Answered, Deleted, Draft, Flagged,
+            Text, To, Uid, Unkeyword, All, Answered, Deleted, Draft, Flagged,
             New, Old, Recent, Seen, Unanswered, Undeleted, Undraft, Unflagged, Unseen
         }
 
@@ -33,7 +33,7 @@ namespace AE.Net.Mail
 
         public static SearchCondition Answered() { return new SearchCondition { Field = Fields.Answered }; }
 
-        public static SearchCondition BCC(string text) { return new SearchCondition { Field = Fields.BCC, Value = text }; }
+        public static SearchCondition Bcc(string text) { return new SearchCondition { Field = Fields.Bcc, Value = text }; }
 
         public static SearchCondition Before(DateTime date) { return new SearchCondition { Field = Fields.Before, Value = date }; }
 
@@ -85,7 +85,7 @@ namespace AE.Net.Mail
 
         public static SearchCondition Text(string text) { return new SearchCondition { Field = Fields.Text, Value = text }; }
         public static SearchCondition To(string text) { return new SearchCondition { Field = Fields.To, Value = text }; }
-        public static SearchCondition UID(string ids) { return new SearchCondition { Field = Fields.UID, Value = ids }; }
+        public static SearchCondition Uid(string ids) { return new SearchCondition { Field = Fields.Uid, Value = ids }; }
         public static SearchCondition Unanswered() { return new SearchCondition { Field = Fields.Unanswered }; }
 
         public static SearchCondition Undeleted() { return new SearchCondition { Field = Fields.Undeleted }; }
@@ -126,7 +126,7 @@ namespace AE.Net.Mail
                 var value = Value;
                 switch (Field)
                 {
-                    case Fields.BCC:
+                    case Fields.Bcc:
                     case Fields.Body:
                     case Fields.From:
                     case Fields.Subject:
@@ -138,7 +138,7 @@ namespace AE.Net.Mail
 
                 if (value is DateTime)
                 {
-                    value = ((DateTime)value).GetRFC2060Date().QuoteString();
+                    value = ((DateTime)value).GetRfc2060Date().QuoteString();
                 }
 
                 if (Field != null) builder.Append(" ");

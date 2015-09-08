@@ -6,29 +6,29 @@ using System.Text.RegularExpressions;
 
 namespace AE.Net.Mail {
 	public struct HeaderValue {
-		private string _RawValue;
-		private SafeDictionary<string, string> _Values;
+		private readonly string _rawValue;
+		private readonly SafeDictionary<string, string> _values;
 
 		public HeaderValue(string value)
 			: this() {
-			_Values = new SafeDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-			_RawValue = (value ?? (value = string.Empty));
-			_Values[string.Empty] = RawValue;
+			_values = new SafeDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			_rawValue = (value ?? (value = string.Empty));
+			_values[string.Empty] = RawValue;
 
 			var semicolon = value.IndexOf(';');
 			if (semicolon > 0) {
-				_Values[string.Empty] = value.Substring(0, semicolon).Trim();
+				_values[string.Empty] = value.Substring(0, semicolon).Trim();
 				value = value.Substring(semicolon).Trim();
-				ParseValues(_Values, value);
+				ParseValues(_values, value);
 			}
 		}
 		public string Value { get { return this[string.Empty] ?? string.Empty; } }
-		public string RawValue { get { return _RawValue ?? string.Empty; } }
+		public string RawValue { get { return _rawValue ?? string.Empty; } }
 
 		public string this[string name] {
-			get { return _Values.Get(name, string.Empty); }
+			get { return _values.Get(name, string.Empty); }
 			set {
-				_Values.Set(name, value);
+				_values.Set(name, value);
 			}
 		}
 
@@ -60,8 +60,12 @@ namespace AE.Net.Mail {
 		}
 
 		public override string ToString() {
-			var props = _Values.Where(x => !string.IsNullOrEmpty(x.Key)).Select(x => x.Key + "=" + x.Value);
+		    string[] props = _values.Where(x => !string.IsNullOrEmpty(x.Key)).Select(x => x.Key + "=" + x.Value).ToArray();
+		    return Value + (props.Length > 0 ? ("; " + string.Join(", ", props)) : null);
+            /* Potential Code Quality Issue
+			var props = _values.Where(x => !string.IsNullOrEmpty(x.Key)).Select(x => x.Key + "=" + x.Value);
 			return Value + (props.Any() ? ("; " + string.Join(", ", props)) : null);
+             */
 		}
 	}
 }

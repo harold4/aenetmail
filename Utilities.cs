@@ -10,13 +10,12 @@ using System.Text.RegularExpressions;
 
 namespace AE.Net.Mail {
 	internal static class Utilities {
-		private static CultureInfo _enUsCulture = CultureInfo.GetCultureInfo("en-US");
+		private static readonly CultureInfo EnUsCulture = CultureInfo.GetCultureInfo("en-US");
 
 		internal static void CopyStream(Stream a, Stream b, int maxLength, int bufferSize = 8192) {
-			int read;
-			var buffer = new byte[bufferSize];
+		    var buffer = new byte[bufferSize];
 			while (maxLength > 0) {
-				read = Math.Min(bufferSize, maxLength);
+				int read = Math.Min(bufferSize, maxLength);
 				read = a.Read(buffer, 0, read);
 				if (read == 0) return;
 				maxLength -= read;
@@ -69,18 +68,17 @@ namespace AE.Net.Mail {
 			return data;
 		}
 
-		internal static string ReadLine(this Stream stream, ref int maxLength, Encoding encoding, char? termChar, int ReadTimeout = 10000) {
+		internal static string ReadLine(this Stream stream, ref int maxLength, Encoding encoding, char? termChar, int readTimeout = 10000) {
 			if (stream.CanTimeout)
-				stream.ReadTimeout = ReadTimeout;
+				stream.ReadTimeout = readTimeout;
 
 			var maxLengthSpecified = maxLength > 0;
-			int i;
-			byte b = 0, b0;
+			byte b = 0;
 			var read = false;
 			using (var mem = new MemoryStream()) {
 				while (true) {
-					b0 = b;
-					i = stream.ReadByte();
+                    byte b0 = b;
+                    int i = stream.ReadByte();
 					if (i == -1) break;
 					else read = true;
 
@@ -112,10 +110,12 @@ namespace AE.Net.Mail {
 			if (stream.CanTimeout)
 				stream.ReadTimeout = 10000;
 
-			int read = 1;
 			byte[] buffer = new byte[8192];
-			using (var mem = new MemoryStream()) {
-				do {
+            using (var mem = new MemoryStream())
+            {
+                int read = 1;
+                do
+                {
 					var length = maxLength == 0 ? buffer.Length : Math.Min(maxLength - (int)mem.Length, buffer.Length);
 					read = stream.Read(buffer, 0, length);
 					mem.Write(buffer, 0, read);
@@ -127,10 +127,15 @@ namespace AE.Net.Mail {
 		}
 
 		internal static void TryDispose<T>(ref T obj) where T : class, IDisposable {
-			try {
-				if (obj != null)
-					obj.Dispose();
-			} catch (Exception) { }
+		    try
+		    {
+		        if (obj != null)
+		            obj.Dispose();
+		    }
+		    catch (Exception)
+		    {
+                // todo: dispose error
+		    }
 			obj = null;
 		}
 
@@ -157,35 +162,35 @@ namespace AE.Net.Mail {
 		internal static DateTime? ToNullDate(this string input) {
 			DateTime result;
 			input = NormalizeDate(input);
-			if (DateTime.TryParse(input, _enUsCulture, DateTimeStyles.None, out result)) {
+			if (DateTime.TryParse(input, EnUsCulture, DateTimeStyles.None, out result)) {
 				return result;
 			} else {
 				return null;
 			}
 		}
 
-		private static Regex rxTimeZoneName = new Regex(@"\s+\([a-z]+\)$", RegexOptions.Compiled | RegexOptions.IgnoreCase); //Mon, 28 Feb 2005 19:26:34 -0500 (EST)
-		private static Regex rxTimeZoneColon = new Regex(@"\s+(\+|\-)(\d{1,2})\D(\d{2})$", RegexOptions.Compiled | RegexOptions.IgnoreCase); //Mon, 28 Feb 2005 19:26:34 -0500 (EST)
-		private static Regex rxTimeZoneMinutes = new Regex(@"([\+\-]?\d{1,2})(\d{2})$", RegexOptions.Compiled); //search can be strict because the format has already been normalized
-		private static Regex rxNegativeHours = new Regex(@"(?<=\s)\-(?=\d{1,2}\:)", RegexOptions.Compiled);
+		private static readonly Regex RxTimeZoneName = new Regex(@"\s+\([a-z]+\)$", RegexOptions.Compiled | RegexOptions.IgnoreCase); //Mon, 28 Feb 2005 19:26:34 -0500 (EST)
+		private static readonly Regex RxTimeZoneColon = new Regex(@"\s+(\+|\-)(\d{1,2})\D(\d{2})$", RegexOptions.Compiled | RegexOptions.IgnoreCase); //Mon, 28 Feb 2005 19:26:34 -0500 (EST)
+		private static readonly Regex RxTimeZoneMinutes = new Regex(@"([\+\-]?\d{1,2})(\d{2})$", RegexOptions.Compiled); //search can be strict because the format has already been normalized
+		private static readonly Regex RxNegativeHours = new Regex(@"(?<=\s)\-(?=\d{1,2}\:)", RegexOptions.Compiled);
 
 		public static string NormalizeDate(string value) {
-			value = rxTimeZoneName.Replace(value, string.Empty);
-			value = rxTimeZoneColon.Replace(value, match => " " + match.Groups[1].Value + match.Groups[2].Value.PadLeft(2, '0') + match.Groups[3].Value);
-			value = rxNegativeHours.Replace(value, string.Empty);
-			var minutes = rxTimeZoneMinutes.Match(value);
+			value = RxTimeZoneName.Replace(value, string.Empty);
+			value = RxTimeZoneColon.Replace(value, match => " " + match.Groups[1].Value + match.Groups[2].Value.PadLeft(2, '0') + match.Groups[3].Value);
+			value = RxNegativeHours.Replace(value, string.Empty);
+			var minutes = RxTimeZoneMinutes.Match(value);
 			if (minutes.Groups[2].Value.ToInt() > 60) { //even if there's no match, the value = 0
 				value = value.Substring(0, minutes.Index) + minutes.Groups[1].Value + "00";
 			}
 			return value;
 		}
 
-		internal static string GetRFC2060Date(this DateTime date) {
-			return date.ToString("dd-MMM-yyyy HH:mm:ss zz", _enUsCulture);
+		internal static string GetRfc2060Date(this DateTime date) {
+			return date.ToString("dd-MMM-yyyy HH:mm:ss zz", EnUsCulture);
 		}
 
-		internal static string GetRFC2822Date(this DateTime date) {
-			return date.ToString("ddd, d MMM yyyy HH:mm:ss zz", _enUsCulture);
+		internal static string GetRfc2822Date(this DateTime date) {
+			return date.ToString("ddd, d MMM yyyy HH:mm:ss zz", EnUsCulture);
 		}
 
 		internal static string QuoteString(this string value) {
@@ -326,7 +331,7 @@ namespace AE.Net.Mail {
 				// Encoding may also be written in lowercase
 				switch (encoding.ToUpperInvariant()) {
 					// RFC:
-					// The "B" encoding is identical to the "BASE64" 
+					// The "B" encoding is identical to the "BASE64"
 					// encoding defined by RFC 2045.
 					// http://tools.ietf.org/html/rfc2045#section-6.8
 					case "B":
@@ -338,7 +343,7 @@ namespace AE.Net.Mail {
 					// transfer-encoding defined in RFC 2045.
 					// There are more details to this. Please check
 					// http://tools.ietf.org/html/rfc2047#section-4.2
-					// 
+					//
 					case "Q":
 						decodedText = DecodeQuotedPrintable(encodedText, charsetEncoding);
 						break;
@@ -355,13 +360,14 @@ namespace AE.Net.Mail {
 		}
 
 		//http://www.opensourcejavaphp.net/csharp/openpopdotnet/HeaderFieldParser.cs.html
-		/// Parse a character set into an encoding.
-		/// </summary>
-		/// <param name="characterSet">The character set to parse</param>
-		/// <param name="@default">The character set to default to if it can't be parsed</param>
-		/// <returns>An encoding which corresponds to the character set</returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="characterSet"/> is <see langword="null"/></exception>
-		public static Encoding ParseCharsetToEncoding(string characterSet, Encoding @default) {
+	    /// <summary>
+	    /// Parse a character set into an encoding.
+	    /// </summary>
+	    /// <param name="characterSet">The character set to parse</param>
+	    /// <param name="default">The character set to default to if it can't be parsed</param>
+	    /// <returns>An encoding which corresponds to the character set</returns>
+	    /// <exception cref="ArgumentNullException">If <paramref name="characterSet"/> is <see langword="null"/></exception>
+	    public static Encoding ParseCharsetToEncoding(string characterSet, Encoding @default) {
 			if (string.IsNullOrEmpty(characterSet))
 				return @default ?? Encoding.Default;
 
@@ -390,16 +396,16 @@ namespace AE.Net.Mail {
 		//stolen from http://stackoverflow.com/questions/3355407/validate-string-is-base64-format-using-regex
 		private const char Base64Padding = '=';
 
-		private static readonly HashSet<char> Base64Characters = new HashSet<char>() { 
-						'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
-						'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 
-						'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
+		private static readonly HashSet<char> Base64Characters = new HashSet<char>() {
+						'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+						'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+						'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
 						'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
 				};
 
 		internal static bool IsValidBase64String(ref string param, bool strictPadding = false) {
 			if (param == null) {
-				// null string is not Base64 
+				// null string is not Base64
 				return false;
 			}
 
@@ -429,15 +435,15 @@ namespace AE.Net.Mail {
 			}
 
 			// replace pad chacters
-			var paramWOPadding = param.TrimEnd(Base64Padding);
-			var lengthWOPadding = paramWOPadding.Length;
+			var paramWithoutPadding = param.TrimEnd(Base64Padding);
+			var lengthWithoutPadding = paramWithoutPadding.Length;
 
-			if ((lengthWPadding - lengthWOPadding) > 2) {
+			if ((lengthWPadding - lengthWithoutPadding) > 2) {
 				// there should be no more than 2 pad characters
 				return false;
 			}
 
-			foreach (char c in paramWOPadding) {
+			foreach (char c in paramWithoutPadding) {
 				if (!Base64Characters.Contains(c)) {
 					// string contains non-Base64 character
 					return false;
@@ -449,16 +455,16 @@ namespace AE.Net.Mail {
 		}
 		#endregion
 
-		internal static VT Get<KT, VT>(this IDictionary<KT, VT> dictionary, KT key, VT defaultValue = default(VT)) {
+		internal static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default(TValue)) {
 			if (dictionary == null)
 				return defaultValue;
-			VT value;
+			TValue value;
 			if (dictionary.TryGetValue(key, out value))
 				return value;
 			return defaultValue;
 		}
 
-		internal static void Set<KT, VT>(this IDictionary<KT, VT> dictionary, KT key, VT value) {
+		internal static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value) {
 			if (!dictionary.ContainsKey(key))
 				lock (dictionary)
 					if (!dictionary.ContainsKey(key)) {
@@ -547,7 +553,7 @@ GET +04
 GFT -03
 GILT +12
 GIT -09
-GMT 
+GMT
 GYT -04
 HADT -09
 HAST -10
@@ -600,7 +606,7 @@ VLAT +10
 WAT +01
 WEDT +01
 WEST +01
-WET 
+WET
 WST +08
 YAKT +09
 YEKT +05"

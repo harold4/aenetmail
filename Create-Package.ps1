@@ -1,10 +1,10 @@
 $name = "AE.Net.Mail";
 
-function create-nuspec() {    
+function create-nuspec() {
 		$spec = get-text "$name.nuspec"
 		$spec = $spec.Replace("#version#", (get-version("bin\release\$name.dll")))
 		$spec = $spec.Replace("#message#", (get-text(".git\COMMIT_EDITMSG")))
-		
+
 		$spec | out-file "bin\Package\AE.Net.Mail.nuspec"
 }
 

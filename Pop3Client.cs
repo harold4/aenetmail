@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 
 namespace AE.Net.Mail {
-	public class Pop3Client : TextClient, IMailClient {
+	public sealed class Pop3Client : TextClient, IMailClient {
 		public Pop3Client() { }
 		public Pop3Client(string host, string username, string password, int port = 110, bool secure = false, bool skipSslValidation = false) {
 			Connect(host, port, secure, skipSslValidation);
@@ -10,41 +10,41 @@ namespace AE.Net.Mail {
 		}
 
 		internal override void OnLogin(string username, string password) {
-			SendCommandCheckOK("USER " + username);
-			SendCommandCheckOK("PASS " + password);
+			SendCommandCheckOk("USER " + username);
+			SendCommandCheckOk("PASS " + password);
 		}
 
 		internal override void OnLogout() {
-			if (_Stream != null) {
+			if (Stream != null) {
 				SendCommand("QUIT");
 			}
 		}
 
-		internal override void CheckResultOK(string result) {
+		internal override void CheckResultOk(string result) {
 			if (!result.StartsWith("+OK", StringComparison.OrdinalIgnoreCase)) {
 				throw new Exception(result.Substring(result.IndexOf(' ') + 1).Trim());
 			}
 		}
 
-		public virtual int GetMessageCount() {
+		public int GetMessageCount() {
 			CheckConnectionStatus();
 			var result = SendCommandGetResponse("STAT");
-			CheckResultOK(result);
+			CheckResultOk(result);
 			return int.Parse(result.Split(' ')[1]);
 		}
 
-		public virtual MailMessage GetMessage(int index, bool headersOnly = false) {
+		public MailMessage GetMessage(int index, bool headersOnly = false) {
 			return GetMessage((index + 1).ToString(), headersOnly);
 		}
 
-		private static Regex rxOctets = new Regex(@"(\d+)\s+octets", RegexOptions.IgnoreCase);
-		public virtual MailMessage GetMessage(string uid, bool headersOnly = false) {
+		private static readonly Regex RxOctets = new Regex(@"(\d+)\s+octets", RegexOptions.IgnoreCase);
+		public MailMessage GetMessage(string uid, bool headersOnly = false) {
 			CheckConnectionStatus();
 			var line = SendCommandGetResponse(string.Format(headersOnly ? "TOP {0} 0" : "RETR {0}", uid));
-			var size = rxOctets.Match(line).Groups[1].Value.ToInt();
-			CheckResultOK(line);
+			var size = RxOctets.Match(line).Groups[1].Value.ToInt();
+			CheckResultOk(line);
 			var msg = new MailMessage();
-			msg.Load(_Stream, headersOnly, size, '.');
+			msg.Load(Stream, headersOnly, size, '.');
 
 			msg.Uid = uid;
 			var last = GetResponse();
@@ -70,17 +70,19 @@ namespace AE.Net.Mail {
 			return msg;
 		}
 
-		public virtual void DeleteMessage(string uid) {
-			SendCommandCheckOK("DELE " + uid);
+		public void DeleteMessage(string uid) {
+			SendCommandCheckOk("DELE " + uid);
 
 		}
 
-		public virtual void DeleteMessage(int index) {
+		public void DeleteMessage(int index) {
 			DeleteMessage((index + 1).ToString());
 		}
 
-		public virtual void DeleteMessage(AE.Net.Mail.MailMessage msg) {
+		public void DeleteMessage(AE.Net.Mail.MailMessage msg) {
 			DeleteMessage(msg.Uid);
 		}
+
+	    public event EventHandler<EmailReadedEventArgs> Rfc822Readed;
 	}
 }

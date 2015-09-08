@@ -3,13 +3,13 @@ using System;
 namespace AE.Net.Mail {
 	public abstract class ObjectWHeaders {
 		public virtual string RawHeaders { get; internal set; }
-		private HeaderDictionary _Headers;
+		private HeaderDictionary _headers;
 		public virtual HeaderDictionary Headers {
 			get {
-				return _Headers ?? (_Headers = HeaderDictionary.Parse(RawHeaders, _DefaultEncoding));
+				return _headers ?? (_headers = HeaderDictionary.Parse(RawHeaders, _defaultEncoding));
 			}
 			internal set {
-				_Headers = value;
+				_headers = value;
 			}
 		}
 
@@ -35,16 +35,18 @@ namespace AE.Net.Mail {
 			}
 		}
 
-		protected System.Text.Encoding _DefaultEncoding = System.Text.Encoding.GetEncoding(1252);
-		protected System.Text.Encoding _Encoding;
+	    // ReSharper disable once InconsistentNaming
+		protected System.Text.Encoding _defaultEncoding = System.Text.Encoding.GetEncoding(1252);
+	    // ReSharper disable once InconsistentNaming
+		protected System.Text.Encoding _encoding;
 		public virtual System.Text.Encoding Encoding {
 			get {
-				return _Encoding ?? (_Encoding = Utilities.ParseCharsetToEncoding(Charset, _DefaultEncoding));
+				return _encoding ?? (_encoding = Utilities.ParseCharsetToEncoding(Charset, _defaultEncoding));
 			}
 			set {
-				_DefaultEncoding = value ?? _DefaultEncoding;
-				if (_Encoding != null) //Encoding has been initialized from the specified Charset
-					_Encoding = value ?? _DefaultEncoding;
+				_defaultEncoding = value ?? _defaultEncoding;
+				if (_encoding != null) //Encoding has been initialized from the specified Charset
+					_encoding = value ?? _defaultEncoding;
 			}
 		}
 

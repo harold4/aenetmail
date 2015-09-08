@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 
 namespace AE.Net.Mail {
-	public class SafeDictionary<KT, VT> : Dictionary<KT, VT> {
+	public class SafeDictionary<TKey, TValue> : Dictionary<TKey, TValue> {
 		public SafeDictionary() { }
-		public SafeDictionary(IEqualityComparer<KT> comparer) : base(comparer) { }
+		public SafeDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }
 
-		public virtual new VT this[KT key] {
+		public virtual new TValue this[TKey key] {
 			get {
 				return this.Get(key);
 			}

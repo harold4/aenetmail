@@ -1,3 +1,6 @@
+!.gitignore
+!.gitattributes
+
 _UpgradeReport_Files\*
 _vti_*
 *.suo
